@@ -3,9 +3,10 @@ from nutrition_tracker.repository.food_nutrition_repository import output_format
 from nutrition_tracker.enums.serving_enum import Serving_Enum as serving
 import copy
 import re
+from nutrition_tracker.service.nutrition_tracker_interface import NutritionTrackerInterface
 
 
-class NutritionalValue:
+class NutritionalValue(NutritionTrackerInterface):
     def __init__(self):
         self.food_data = food_nutrition_repository.food_data
 
@@ -385,7 +386,7 @@ class NutritionalValue:
         days_nutritional_data_without_units_rounded_off = self.value_round_off(
             days_nutritional_data_without_units, 2)
 
-        # nutrition_tracker.print_a_days_nutritional_data_split_into_meals(ultimate_result)
+        self.print_a_days_nutritional_data_split_into_meals(ultimate_result)
         raw_days_nutritional_data_with_units_in_meals_basis = self.serve_a_days_nutritional_data_split_into_meals_as_data_with_units(
             ultimate_result)
         days_nutritional_data_with_units = (
@@ -394,6 +395,11 @@ class NutritionalValue:
 
         return [days_nutritional_data_with_units, raw_days_nutritional_data_with_units_in_meals_basis]
 
+    def take_file_name_of_text_file_and_give_text_file(self, file_name):
+        file_path = '/Users/afzhalahmed/Documents/GitHub/nutrition-tracker/nutrition_tracker/assets/' + file_name
 
-
+        # from data in local system as text file
+        with open(file_path, 'r') as file:
+            text_file_content = file.read()
+            return text_file_content
 
