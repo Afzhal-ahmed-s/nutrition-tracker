@@ -1,6 +1,7 @@
 from nutrition_tracker.enums.serving_enum import Serving_Enum as serving
 from nutrition_tracker.service import nutrition_tracker_service
 
+
 nutrition_tracker = nutrition_tracker_service.NutritionalValue()
 
 print("*** This is git version *** \n")
@@ -23,13 +24,11 @@ sample_data_for_a_meal_1 = [
     ["peanut_butter", 20],
     ["albumen", 3]
 ]
-
 sample_data_for_a_meal_2 = [
     ["water", 2],
     ["peanut_butter", 30],
     ["honey", 100]
 ]
-
 sample_data_for_a_meal_3 = [
     ["honey", 100]
 ]
@@ -42,7 +41,6 @@ sample_data_meals_for_a_day_1 = [
      ["peanut_butter", 20],
      ["albumen", 3]]
 ]
-
 sample_data_meals_for_a_day_2 = [
     [['dates', 17.0], ['cow_milk', 200.0], ['banana', 150.0], ['honey', 10.0]],
     [['whole_egg', 4.0], ['albumen', 2.0], ['peanut_spinach_amla_salad_(medium)', 1.0], ['cooked_rice', 120.0]],
@@ -52,14 +50,12 @@ sample_data_meals_for_a_day_2 = [
     [['cooked_wheat_chapati', 240.0], ['cooked_chicken_normal_cut', 100.0]],
     [['cow_milk', 200.0]], [['water', 2.5]]
 ]
-
 sample_data_meals_for_a_day_3 = [
     [['dates', 17.0], ['cow_milk', 200.0], ['banana', 150.0], ['test1', 12]],
     [['uncooked_oats', 100.0], ['test2', 12], ['on_gs_c', 1.0]],
     [['cow_milk', 200.0]],
     [['water', 2.5], ['honey', 100]]
 ]
-
 sample_data_meals_for_a_day_feeder_1 = [
     [['dates', 17.0, 'g'], ['cow_milk', 200.0, 'g'], ['banana', 150.0, 'g'], ['honey', 10.0, 'g']],
     [['whole_boiled_egg', 4.0], ['albumen', 2.0], ['peanut_spinach_amla_salad_(medium)', 1.0],
@@ -69,7 +65,6 @@ sample_data_meals_for_a_day_feeder_1 = [
     [['rice', 300.0, 'g'], ['albumen', 6.0], ['yolk', 1.0]], [['chapati', 240.0, 'g'], ['chicken', 100.0, 'g']],
     [['milk', 200.0, 'g']], [['water', 2.5, 'L']]
 ]
-
 sample_data_meals_for_a_day_feeder_2 = [
     [['dates', 17.0], ['cow_milk', 200.0], ['banana', 150.0], ['honey', 10.0]],
     [['whole_boiled_egg', 4.0], ['albumen', 2.0], ['peanut_spinach_amla_salad_(medium)', 1.0],
@@ -80,6 +75,7 @@ sample_data_meals_for_a_day_feeder_2 = [
     [['cooked_wheat_chapati', 240.0], ['cooked_chicken_normal_cut', 100.0]],
     [['cow_milk', 200.0]], [['water', 2.5]],
 ]
+
 
 # # single food
 # single_food_data = (nutrition_tracker.calculate_nutritional_value_for_single_food("peanut_butter", 10))
@@ -97,7 +93,20 @@ sample_data_meals_for_a_day_feeder_2 = [
 
 
 # a day's meal data
+
+
+#
+
+
+# day's consolidated nutritional data from local text file
+text_file = nutrition_tracker.take_file_name_of_text_file_and_give_text_file("sample_nov_9_2023_data")
 ans = nutrition_tracker.take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
-    raw_data_2)
+        text_file)
 print("Consolidated day's data: ", ans[0], "\n")
 print(" Day's data in meals basis: ", ans[1])
+
+# # from data in script
+# ans = nutrition_tracker.take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
+#     raw_data_2)
+# print("Consolidated day's data: ", ans[0], "\n")
+# print(" Day's data in meals basis: ", ans[1])
