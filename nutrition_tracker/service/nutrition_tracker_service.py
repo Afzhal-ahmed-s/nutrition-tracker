@@ -1,7 +1,8 @@
-from repository import food_nutrition_repository
-from repository.food_nutrition_repository import output_format_with_units, output_format_without_units
-from enums.serving_enum import Serving_Enum as serving
+from nutrition_tracker.repository import food_nutrition_repository
+from nutrition_tracker.repository.food_nutrition_repository import output_format_with_units, output_format_without_units
+from nutrition_tracker.enums.serving_enum import Serving_Enum as serving
 import copy
+import re
 
 
 class NutritionalValue:
@@ -16,6 +17,8 @@ class NutritionalValue:
             # Extract the per serving or per piece value based on the serving_type
             if serving_type is None:
                 serving_type = serving.PER_100_GRAMS
+            else:
+                serving_type = self.give_me_serving_enum_in_return_for_string(serving_type)
 
             if serving_type == serving.PER_SERVING:
                 per_serving = float(food_item['data']['quantity'])
@@ -24,6 +27,7 @@ class NutritionalValue:
             elif serving_type == serving.PER_100_GRAMS:
                 per_100_grams = float(food_item['data']['quantity'])
             else:
+                print("debug ", food_name, serving_type)
                 raise ValueError("Invalid serving type")
 
             nutritional_values = food_item['data'].copy()  # Make a copy of the original data
@@ -37,8 +41,7 @@ class NutritionalValue:
                         nutritional_values[key] = value * (quantity / per_piece)
                     elif serving_type == serving.PER_100_GRAMS:
                         nutritional_values[key] = value * (quantity / per_100_grams)
-
-            # print(food_name, nutritional_values)
+                        # print("debug: ", food_name, key , value * (quantity / per_100_grams) )
             return nutritional_values
         else:
             return food_name + " is not available in the repository."
@@ -51,7 +54,6 @@ class NutritionalValue:
         for i in list_of_a_food_item_detail:
             food_name = i[0]
             quantity = i[1]
-            # print("debug lv3", food_name, quantity)
             if len(i) > 2:
                 serving_type = i[2]
                 single_food_data = self.calculate_nutritional_value_for_single_food(food_name,
@@ -171,12 +173,48 @@ class NutritionalValue:
             if len(ingredients_and_nutrition[2]) > 0:
                 # Handle messages like "['test1 is not available in the repository.']"
                 message = ingredients_and_nutrition[2]
-                print("Message:", message, "\n")
+                print("Message:", message)
+            print("\n")
 
             # print("Raw data: ",ingredients_and_nutrition[3], "\n")
             # raw_per_day_nutritional_information.append(ingredients_and_nutrition[3])
 
             # print(raw_per_day_nutritional_information)
+
+    def serve_a_days_nutritional_data_split_into_meals_as_data_with_units(self, raw_data):
+        raw_per_day_nutritional_information_per_meals_basis_with_units = []
+
+        for i in range(0, len(raw_data), 2):
+            meal_number = raw_data[i]
+            ingredients_and_nutrition = raw_data[i + 1]
+
+            # Process meal_number (e.g., 'MEAL NUMBER: 1')
+            raw_per_day_nutritional_information_per_meals_basis_with_units.append(meal_number)
+
+            # Process ingredients_and_nutrition, which is a list with two elements
+            ingredients = ingredients_and_nutrition[0]
+            nutrition = ingredients_and_nutrition[1]
+
+            local_food_item_quantity = []
+            # Process ingredients and nutrition information
+            for ingredient in ingredients:
+                # Process ingredient data (e.g., ['dates', 17.0])
+                ingredient_name, quantity = ingredient
+                local_food_item_quantity.append(f"Ingredient: {ingredient_name}, Quantity: {quantity}")
+
+            raw_per_day_nutritional_information_per_meals_basis_with_units.append(local_food_item_quantity)
+
+            # Process nutrition information
+            ni = "Nutrition Information: ", nutrition
+            raw_per_day_nutritional_information_per_meals_basis_with_units.append(ni)
+
+            if len(ingredients_and_nutrition[2]) > 0:
+                # Handle messages like "['test1 is not available in the repository.']"
+                message = ingredients_and_nutrition[2]
+                m = "Message:", message
+                raw_per_day_nutritional_information_per_meals_basis_with_units.append(m)
+
+        return raw_per_day_nutritional_information_per_meals_basis_with_units
 
     def get_raw_nutritional_data_of_meals_in_a_day(self, ultimate_data_compiled):
         raw_per_day_nutritional_information = []
@@ -207,6 +245,45 @@ class NutritionalValue:
             # print(raw_per_day_nutritional_information)
         return raw_per_day_nutritional_information
 
+    # def get_raw_nutritional_data_of_meals_in_a_day(self, ultimate_data_compiled):
+    #     raw_per_day_nutritional_information = []
+    #
+    #     for i in range(0, len(ultimate_data_compiled), 2):
+    #         meal_number = ultimate_data_compiled[i]
+    #         meal_data = ultimate_data_compiled[i + 1]
+    #
+    #         ingredients = meal_data[0]
+    #         nutrition = meal_data[1]
+    #         messages = meal_data[2]
+    #
+    #         # Process ingredients
+    #         processed_ingredients = []
+    #         for ingredient_info in ingredients:
+    #             if len(ingredient_info) == 3:
+    #                 ingredient_name, quantity, unit = ingredient_info
+    #                 # Process the ingredient name, quantity, and unit here
+    #                 processed_ingredients.append({
+    #                     'name': ingredient_name,
+    #                     'quantity': quantity,
+    #                     'unit': unit
+    #                 })
+    #             else:
+    #                 # Handle invalid ingredient format
+    #                 print(f"Skipping invalid ingredient format: {ingredient_info}")
+    #
+    #         # Process nutrition information
+    #         # Handle messages if necessary
+    #
+    #         # Append processed data to raw_per_day_nutritional_information
+    #         raw_per_day_nutritional_information.append({
+    #             'meal_number': meal_number,
+    #             'ingredients': processed_ingredients,
+    #             'nutrition': nutrition,
+    #             'messages': messages
+    #         })
+    #
+    #     return raw_per_day_nutritional_information
+
     def add_units_to_food_list(self, list_of_food_and_quantity):
         # list_of_food_and_quantity = [['uncooked_oats', 100.0], ['test2', 12], ['on_gs_c', 1.0]]
         for i in list_of_food_and_quantity:
@@ -221,4 +298,102 @@ class NutritionalValue:
                         i[1] = temp
 
         return list_of_food_and_quantity
+
+    def process_measurement_unit(self, unit):
+        # Lowercase the string
+        unit = unit.lower()
+
+        # Check if the string is 'gram' and convert it to 'g'
+        if unit == 'gram':
+            unit = 'g'
+        # Check if the string ends with 's' and remove it if it does
+        elif unit.endswith('s'):
+            unit = unit[:-1]
+
+        return unit
+
+    def give_me_serving_enum_in_return_for_string(self, unit_in_string):
+        if unit_in_string == 'g' or 'gram' or 'grams':
+            return serving.PER_100_GRAMS
+        elif unit_in_string == 'piece' or 'pieces':
+            return serving.PER_PIECE
+        elif unit_in_string == 'serving' or 'servings':
+            return serving.PER_SERVING
+        else:
+            return None
+
+    def return_quantity_as_number_from_a_string_combination(self, data):
+        match = re.match(r'(\d*\.?\d+)([a-zA-Z]*)', data)
+        if match:
+            numeric_part, non_numeric_part = match.groups()
+            # print(f"Original: {s}, Numeric: {numeric_part}, Non-Numeric: {non_numeric_part}")
+            return (float(numeric_part))
+
+    def parse_text_data_to_desired_initial_input_format(self, text_data):
+        raw_data_list = text_data.split("\n")
+        # print("c1", raw_data_list)
+
+        list_data_by_meals = []
+
+        for i in raw_data_list:
+            temporary = []
+            temporary.append(i)
+            list_data_by_meals.append(temporary)
+        # print("c2", list_data_by_meals)
+
+        list_data_by_meals_food = []
+
+        for i in list_data_by_meals:
+            list_data_by_meals_food.append(i[0].strip().split(","))
+        # print("c3", list_data_by_meals_food)
+
+        list_data_by_meals_food_quantity = []
+
+        for i in list_data_by_meals_food:
+            outer = []
+
+            for j in i:
+                local = []
+                temp = (j.strip().split(" "))
+                # print("debug ", temp)
+                local.append(temp[0].lower())
+                if len(temp) == 3:
+                    local.append(float(temp[1]))
+                    # local.append(temp[2])
+
+                elif len(temp) == 2:
+                    number_without_unit = self.return_quantity_as_number_from_a_string_combination(temp[1])
+                    local.append(number_without_unit)
+                    # local.append(temp[1])
+
+                else:
+                    local.append(1.0)
+                outer.append(local)
+            list_data_by_meals_food_quantity.append(outer)
+        return (list_data_by_meals_food_quantity)
+
+    def take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
+            self, raw_text_data):
+        parsed_data = self.parse_text_data_to_desired_initial_input_format(raw_text_data)
+
+        ultimate_result = self.calculate_nutritional_value_for_multiple_meals(parsed_data)
+
+        raw_per_day_nutritional_information = self.get_raw_nutritional_data_of_meals_in_a_day(
+            ultimate_result)
+        days_nutritional_data_without_units = self.add_up_nutritional_data_without_units_for_a_day(
+            raw_per_day_nutritional_information)
+        days_nutritional_data_without_units_rounded_off = self.value_round_off(
+            days_nutritional_data_without_units, 2)
+
+        # nutrition_tracker.print_a_days_nutritional_data_split_into_meals(ultimate_result)
+        raw_days_nutritional_data_with_units_in_meals_basis = self.serve_a_days_nutritional_data_split_into_meals_as_data_with_units(
+            ultimate_result)
+        days_nutritional_data_with_units = (
+            self.append_units_to_data(days_nutritional_data_without_units_rounded_off,
+                                                   output_format_with_units))
+
+        return [days_nutritional_data_with_units, raw_days_nutritional_data_with_units_in_meals_basis]
+
+
+
 
