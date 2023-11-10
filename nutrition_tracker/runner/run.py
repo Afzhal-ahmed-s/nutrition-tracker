@@ -101,9 +101,10 @@ sample_data_meals_for_a_day_feeder_2 = [
 # day's consolidated nutritional data from local text file
 text_file = nutrition_tracker.take_file_name_of_text_file_and_give_text_file("sample_nov_9_2023_data")
 ans = nutrition_tracker.take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
-        text_file)
-print("Consolidated day's data: ", ans[0], "\n")
-print(" Day's data in meals basis: ", ans[1])
+        text_file, True,False, False)
+
+for e in ans:
+    print(e)
 
 # # from data in script
 # ans = nutrition_tracker.take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
