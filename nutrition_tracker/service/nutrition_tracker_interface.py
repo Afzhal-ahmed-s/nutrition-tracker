@@ -45,7 +45,7 @@ class NutritionTrackerInterface(ABC):
 
     @abstractmethod
     def take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
-            self, raw_text_data):
+            self, raw_text_data, consolidated_data, raw_meal_wise_data, print_meal_wise_data_for_the_day):
         pass
 
     @abstractmethod
@@ -70,4 +70,8 @@ class NutritionTrackerInterface(ABC):
 
     @abstractmethod
     def take_file_name_of_text_file_and_give_text_file(self, file_name):
+        pass
+
+    @abstractmethod
+    def convert_request_to_boolean(self, one, two, three):
         pass

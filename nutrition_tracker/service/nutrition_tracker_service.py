@@ -28,7 +28,6 @@ class NutritionalValue(NutritionTrackerInterface):
             elif serving_type == serving.PER_100_GRAMS:
                 per_100_grams = float(food_item['data']['quantity'])
             else:
-                print("debug ", food_name, serving_type)
                 raise ValueError("Invalid serving type")
 
             nutritional_values = food_item['data'].copy()  # Make a copy of the original data
@@ -42,7 +41,6 @@ class NutritionalValue(NutritionTrackerInterface):
                         nutritional_values[key] = value * (quantity / per_piece)
                     elif serving_type == serving.PER_100_GRAMS:
                         nutritional_values[key] = value * (quantity / per_100_grams)
-                        # print("debug: ", food_name, key , value * (quantity / per_100_grams) )
             return nutritional_values
         else:
             return food_name + " is not available in the repository."
@@ -64,14 +62,11 @@ class NutritionalValue(NutritionTrackerInterface):
             else:
                 single_food_data = self.calculate_nutritional_value_for_single_food(food_name,
                                                                                     quantity)
-            # print("debug lv6", food_name, single_food_data)
             if isinstance(single_food_data, str):
                 foods_not_available.append(single_food_data)
             else:
-                # print("debug lv8", local_operation_end_data)
                 local_operation_end_data = self.add_up_data_to_desired_format(local_operation_end_data,
                                                                               single_food_data)
-                # print("debug lv7", local_operation_end_data)
 
         rounded_off_data = self.value_round_off(local_operation_end_data, 2)
         nutritional_meal_data_without_units = copy.deepcopy(rounded_off_data)
@@ -87,12 +82,9 @@ class NutritionalValue(NutritionTrackerInterface):
         meal_number = 1
 
         for i in mega_list_data:
-            # print("debug lv1", i)
 
             single_meals_nutritional_data = self.calculate_nutritional_value_for_a_meal(i)
-            # print("debug lv2",single_meals_nutritional_data)
-            # nutritional_data_of_multiple_meals.append( single_meals_nutritional_data[0] )
-            # nutritional_data_of_multiple_meals.append( single_meals_nutritional_data[2] )
+
             nutritional_data_of_multiple_meals.append("MEAL NUMBER: " + str(meal_number))
             meal_number += 1
             nutritional_data_of_multiple_meals.append(single_meals_nutritional_data)
@@ -102,7 +94,6 @@ class NutritionalValue(NutritionTrackerInterface):
         for key, value in final_data.items():
             if isinstance(value, dict):
                 if key in data_dict and isinstance(data_dict[key], dict):
-                    # print("debug lv5",final_data[key])
                     self.add_up_data_to_desired_format(final_data[key], data_dict[key])
             elif isinstance(value, (int, float)):
                 if key in data_dict and isinstance(data_dict[key], (int, float)):
@@ -145,7 +136,6 @@ class NutritionalValue(NutritionTrackerInterface):
             days_nutritional_data_without_units = self.add_up_data_to_desired_format(days_nutritional_data_without_units,
                                                i)
 
-        # print("days_nutritional_data_without_units: ", days_nutritional_data_without_units)
         return days_nutritional_data_without_units
 
     def print_a_days_nutritional_data_split_into_meals(self, raw_data):
@@ -374,7 +364,8 @@ class NutritionalValue(NutritionTrackerInterface):
         return (list_data_by_meals_food_quantity)
 
     def take_in_raw_user_text_data_serve_nutritional_data_split_into_meals_with_units_and_days_nutritional_data_with_units(
-            self, raw_text_data):
+            self, raw_text_data, consolidated_data = True, raw_meal_wise_data = False, print_meal_wise_data_for_the_day = False):
+
         parsed_data = self.parse_text_data_to_desired_initial_input_format(raw_text_data)
 
         ultimate_result = self.calculate_nutritional_value_for_multiple_meals(parsed_data)
@@ -386,14 +377,22 @@ class NutritionalValue(NutritionTrackerInterface):
         days_nutritional_data_without_units_rounded_off = self.value_round_off(
             days_nutritional_data_without_units, 2)
 
-        self.print_a_days_nutritional_data_split_into_meals(ultimate_result)
         raw_days_nutritional_data_with_units_in_meals_basis = self.serve_a_days_nutritional_data_split_into_meals_as_data_with_units(
             ultimate_result)
         days_nutritional_data_with_units = (
             self.append_units_to_data(days_nutritional_data_without_units_rounded_off,
                                                    output_format_with_units))
 
-        return [days_nutritional_data_with_units, raw_days_nutritional_data_with_units_in_meals_basis]
+        list_to_serve = []
+        if consolidated_data:
+           list_to_serve.append(days_nutritional_data_with_units)
+        if raw_meal_wise_data:
+            list_to_serve.append(raw_days_nutritional_data_with_units_in_meals_basis)
+        if print_meal_wise_data_for_the_day:
+            print("debug found", print_meal_wise_data_for_the_day)
+            self.print_a_days_nutritional_data_split_into_meals(ultimate_result)
+
+        return list_to_serve
 
     def take_file_name_of_text_file_and_give_text_file(self, file_name):
         file_path = '/Users/afzhalahmed/Documents/GitHub/nutrition-tracker/nutrition_tracker/assets/' + file_name
@@ -403,3 +402,26 @@ class NutritionalValue(NutritionTrackerInterface):
             text_file_content = file.read()
             return text_file_content
 
+    def convert_request_to_boolean(self, one, two, three):
+        one = one.lower()
+        two = two.lower()
+        three = three.lower()
+        print(one, two, three)
+
+        ans = []
+        if one == 'y' or one == 'true' or one == 'yes' or one == 't':
+            ans.append(True)
+        else:
+            ans.append(False)
+
+        if two == 'y' or two == 'true' or two == 'yes' or two == 't':
+            ans.append(True)
+        else:
+            ans.append(False)
+
+        if three == 'y' or three == 'true' or three == 'yes' or three == 't':
+            ans.append(True)
+        else:
+            ans.append(False)
+
+        return ans
