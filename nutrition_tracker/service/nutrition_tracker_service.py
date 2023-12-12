@@ -395,8 +395,8 @@ class NutritionalValue(NutritionTrackerInterface):
         return list_to_serve
 
     def take_file_name_of_text_file_and_give_text_file(self, file_name):
-        file_path = '/Users/afzhalahmed/Documents/GitHub/nutrition-tracker/nutrition_tracker/assets/' + file_name
-
+        # file_path = '/Users/afzhalahmed/Documents/GitHub/nutrition-tracker/nutrition_tracker/assets/' + file_name
+        file_path = file_name
         # from data in local system as text file
         with open(file_path, 'r') as file:
             text_file_content = file.read()
@@ -406,7 +406,7 @@ class NutritionalValue(NutritionTrackerInterface):
         one = one.lower()
         two = two.lower()
         three = three.lower()
-        print(one, two, three)
+        # print(one, two, three)
 
         ans = []
         if one == 'y' or one == 'true' or one == 'yes' or one == 't':

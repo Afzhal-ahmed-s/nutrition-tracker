@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Input Page</title>
+    <style>
+        input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="inputFields">
+        <span>Meal 1: </span><input type="text" placeholder="Enter your food data here">
+    </div>
+    <button onclick="addInputField()">Add</button>
+    <button onclick="submitData()">Submit</button>
+
+    <div id="responseContainer"></div>
+
+    <script>
+        var mealNumber = 2; // Start with Meal 2 for the next addition
+        var apiUrl = "http://127.0.0.1:5000/serve_nutrition_data/y/y/n";
+
+        function addInputField() {
+            var inputFieldsDiv = document.getElementById('inputFields');
+            var newInputField = document.createElement('input');
+            newInputField.type = 'text';
+            newInputField.placeholder = "Enter your food data here";
+            inputFieldsDiv.appendChild(document.createElement('br'));
+            inputFieldsDiv.appendChild(document.createTextNode('Meal ' + mealNumber + ': '));
+            inputFieldsDiv.appendChild(newInputField);
+            mealNumber++;
+        }
+
+        function getCurrentTimestamp() {
+            var now = new Date();
+            var timestamp = now.toISOString().replace(/[-:]/g, "").replace(/\..+/, "");
+            return timestamp;
+        }
+
+        function submitData() {
+            var inputFields = document.querySelectorAll('#inputFields input');
+            var result = '';
+
+           inputFields.forEach(function (inputField, index, fields) {
+            result += inputField.value.trim();
+            if (index < fields.length - 1) {
+                result += '\n';
+            }
+            });
+
+            // Generate a timestamp
+            var timestamp = getCurrentTimestamp();
+
+            // Create a Blob from the result text
+            var blob = new Blob([result], { type: 'text/plain' });
+
+            // Create a FormData object and append the Blob with the absolute file path
+            var formData = new FormData();
+            formData.append('file', blob, '/Users/afzhalahmed/Documents/GitHub/nutrition-tracker/nutrition_tracker/assets/nutrition_data_' + timestamp);
+
+            // Make a POST request to the API endpoint
+            fetch(apiUrl, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display the response in the page
+                var responseContainer = document.getElementById('responseContainer');
+                responseContainer.textContent = 'Data: ' + JSON.stringify(data.result, null, 2);
+            })
+            .catch(error => {
+                // Display the error in the page
+                console.error('Fetch Error:', error);
+                var responseContainer = document.getElementById('responseContainer');
+                responseContainer.textContent = 'Error: ' + error.message;
+            });
+        }
+    </script>
+
+</body>
+</html>
